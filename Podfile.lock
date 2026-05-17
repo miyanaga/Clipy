@@ -1,34 +1,34 @@
 PODS:
-  - AEXML (4.6.0)
-  - BartyCrouch (3.13.0)
-  - KeyHolder (4.0.0):
-    - Magnet (~> 3.2)
+  - AEXML (4.7.0)
+  - BartyCrouch (4.15.0)
+  - KeyHolder (4.2.0):
+    - Magnet (~> 3.4.0)
   - LetsMove (1.25)
   - LoginServiceKit (2.5.0)
-  - Magnet (3.2.0):
-    - Sauce (~> 2.1)
-  - PINCache (3.0.3):
-    - PINCache/Arc-exception-safe (= 3.0.3)
-    - PINCache/Core (= 3.0.3)
-  - PINCache/Arc-exception-safe (3.0.3):
+  - Magnet (3.4.0):
+    - Sauce (~> 2.4.0)
+  - PINCache (3.0.4):
+    - PINCache/Arc-exception-safe (= 3.0.4)
+    - PINCache/Core (= 3.0.4)
+  - PINCache/Arc-exception-safe (3.0.4):
     - PINCache/Core
-  - PINCache/Core (3.0.3):
-    - PINOperation (~> 1.2.1)
-  - PINOperation (1.2.1)
-  - Realm (10.7.2):
-    - Realm/Headers (= 10.7.2)
-  - Realm/Headers (10.7.2)
-  - RealmSwift (10.7.2):
-    - Realm (= 10.7.2)
-  - RxCocoa (5.1.1):
-    - RxRelay (~> 5)
-    - RxSwift (~> 5)
-  - RxRelay (5.1.1):
-    - RxSwift (~> 5)
-  - RxSwift (5.1.1)
-  - Sauce (2.1.0)
-  - Sparkle (1.26.0)
-  - SwiftGen (6.4.0)
+  - PINCache/Core (3.0.4):
+    - PINOperation (~> 1.2.3)
+  - PINOperation (1.2.3)
+  - Realm (20.0.4):
+    - Realm/Headers (= 20.0.4)
+  - Realm/Headers (20.0.4)
+  - RealmSwift (20.0.4):
+    - Realm (= 20.0.4)
+  - RxCocoa (6.9.0):
+    - RxRelay (= 6.9.0)
+    - RxSwift (= 6.9.0)
+  - RxRelay (6.9.0):
+    - RxSwift (= 6.9.0)
+  - RxSwift (6.9.0)
+  - Sauce (2.4.1)
+  - Sparkle (2.9.1)
+  - SwiftGen (6.6.3)
   - SwiftHEXColors (1.4.1)
   - SwiftLint (0.63.2)
 
@@ -44,7 +44,7 @@ DEPENDENCIES:
   - RxCocoa
   - RxSwift
   - Sauce
-  - Sparkle
+  - Sparkle (~> 2.0)
   - SwiftGen
   - SwiftHEXColors
   - SwiftLint
@@ -79,25 +79,25 @@ CHECKOUT OPTIONS:
     :git: https://github.com/Clipy/LoginServiceKit.git
 
 SPEC CHECKSUMS:
-  AEXML: 2fbb73d8724797ed2cde888731e176fa4d44dd83
-  BartyCrouch: 69e5e6ec67e77951dc1c22aa48abbf05d175b81c
-  KeyHolder: 457d8dde330a17452672756ae0e3b9c2e180a7e2
+  AEXML: 5ff2a4695529348cda96b8b872cf73212ad050d7
+  BartyCrouch: c6af540fb6cf0206daa280f0c36a5ee9d0ba56b1
+  KeyHolder: b22f09b0c95fa4de579864108c6eb506beb09dd6
   LetsMove: 7b9fe44737707d984fbd3f47af46609a9a07b461
   LoginServiceKit: 87c3d42ddb80d39ee8ea6b7a93f8c654ff58781b
-  Magnet: 8316a30fe91fdc6f2816ec0f04e20c72e341ca2e
-  PINCache: 7a8fc1a691173d21dbddbf86cd515de6efa55086
-  PINOperation: 00c935935f1e8cf0d1e2d6b542e75b88fc3e5e20
-  Realm: e523da9ade306c5ae87e85dc09fdef148d3e1cc1
-  RealmSwift: 4f6758c3adbdcc87f7b7777107226532a077f61c
-  RxCocoa: 32065309a38d29b5b0db858819b5bf9ef038b601
-  RxRelay: d77f7d771495f43c556cbc43eebd1bb54d01e8e9
-  RxSwift: 81470a2074fa8780320ea5fe4102807cb7118178
-  Sauce: a4075a04b6041e7a0c992a952cc79f7a0ebdb8e3
-  Sparkle: d56d028f4b0c123577825f5d1004f6140d77f90e
-  SwiftGen: 67860cc7c3cfc2ed25b9b74cfd55495fc89f9108
+  Magnet: d9212b3bb4fc0be22676279960185eeda6823b91
+  PINCache: d9a87a0ff397acffe9e2f0db972ac14680441158
+  PINOperation: fb563bcc9c32c26d6c78aaff967d405aa2ee74a7
+  Realm: 1fca83c42ac1d5c7767974882c8de5a7abca4d89
+  RealmSwift: 84f36320f6133dea78d05c55bb46bba4387d6828
+  RxCocoa: ac16414696ae706516be3e1ab00fcce5bdc9be8a
+  RxRelay: 6b0c930e5cef57d5fe2032571e5e65b78e3cbdb1
+  RxSwift: 31649ace6aceeb422e16ff71c60804f9c3281ed9
+  Sauce: e4ffcf0332a298a0cb2f29b4200119bedbac23c5
+  Sparkle: a4115cd9a339b297a61163256e6954d9e35297ce
+  SwiftGen: 4993cbf71cbc4886f775e26f8d5c3a1188ec9f99
   SwiftHEXColors: 1cb6e5d55c52749aa33db8f088ac55eb71ca4c7f
   SwiftLint: 4fa4a9b437ccc4fc72f6c0bc98556e8e9e05bccf
 
-PODFILE CHECKSUM: 891e7be693f44dc8eb86c7ed1d64fe7c4c807cb9
+PODFILE CHECKSUM: 8be521affddfa3a0ef9eef038387f86cc30b38d7
 
 COCOAPODS: 1.16.2

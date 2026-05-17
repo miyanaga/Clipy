@@ -53,11 +53,21 @@ final class PasteService {
     }
 }
 
+// MARK: - Archive
+private extension PasteService {
+    static func unarchiveClipData(atPath path: String) -> CPYClipData? {
+        guard let fileData = try? Data(contentsOf: URL(fileURLWithPath: path)) else { return nil }
+        let unarchiver = try? NSKeyedUnarchiver(forReadingFrom: fileData)
+        unarchiver?.requiresSecureCoding = false
+        return unarchiver?.decodeObject(forKey: NSKeyedArchiveRootObjectKey) as? CPYClipData
+    }
+}
+
 // MARK: - Copy
 extension PasteService {
     func paste(with clip: CPYClip) {
         guard !clip.isInvalidated else { return }
-        guard let data = NSKeyedUnarchiver.unarchiveObject(withFile: clip.dataPath) as? CPYClipData else { return }
+        guard let data = Self.unarchiveClipData(atPath: clip.dataPath) else { return }
 
         // Handling modifier actions
         let isPastePlainText = self.isPastePlainText
@@ -98,7 +108,7 @@ extension PasteService {
     func copyToPasteboard(with clip: CPYClip) {
         lock.lock(); defer { lock.unlock() }
 
-        guard let data = NSKeyedUnarchiver.unarchiveObject(withFile: clip.dataPath) as? CPYClipData else { return }
+        guard let data = Self.unarchiveClipData(atPath: clip.dataPath) else { return }
 
         if isPastePlainText {
             copyToPasteboard(with: data.stringValue)
@@ -147,7 +157,7 @@ extension PasteService {
             return
         }
 
-        let vKeyCode = Sauce.shared.keyCode(by: .v)
+        let vKeyCode = Sauce.shared.keyCode(for: .v)
         DispatchQueue.main.async {
             let source = CGEventSource(stateID: .combinedSessionState)
             // Disable local keyboard events while pasting

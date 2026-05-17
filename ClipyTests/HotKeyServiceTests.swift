@@ -217,7 +217,9 @@ final class HotKeyServiceTests {
 
         let defaults = UserDefaults.standard
         let savedData = try #require(defaults.object(forKey: Constants.HotKey.clearHistoryKeyCombo) as? Data)
-        let savedKeyCombo = try #require(NSKeyedUnarchiver.unarchiveObject(with: savedData) as? KeyCombo)
+        let unarchiver = try #require(try? NSKeyedUnarchiver(forReadingFrom: savedData))
+        unarchiver.requiresSecureCoding = false
+        let savedKeyCombo = try #require(unarchiver.decodeObject(forKey: NSKeyedArchiveRootObjectKey) as? KeyCombo)
         #expect(savedKeyCombo == keyCombo)
 
         service.changeClearHistoryKeyCombo(nil)

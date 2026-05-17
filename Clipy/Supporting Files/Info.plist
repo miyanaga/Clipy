@@ -27,14 +27,14 @@
 	<key>LSUIElement</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2015年 Shunsuke Furubayashi. All rights reserved.</string>
+	<string>Copyright © 2015 Shunsuke Furubayashi. Copyright © 2026 Kunihiko Miyanaga. All rights reserved.</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>SUFeedURL</key>
-	<string>https://clipy-app.com/appcast.xml</string>
-	<key>SUPublicDSAKeyFile</key>
-	<string>dsa_pub.pem</string>
+	<string>https://miyanaga.github.io/Clipy/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>G+OlCTHiCeABWj9p/WCArguXa3zAxHQYxD6pBbyX0U8=</string>
 </dict>
 </plist>
