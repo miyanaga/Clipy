@@ -14,21 +14,27 @@ import Cocoa
 
 class CPYDesignableButton: NSButton {
 
-    @IBInspectable var textColor: NSColor = ColorName.title.color
+    @IBInspectable var textColor: NSColor = .labelColor {
+        didSet { updateAttributedTitle() }
+    }
 
-    // MARK: - Initialize
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
-        initView()
+        updateAttributedTitle()
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        initView()
+        updateAttributedTitle()
     }
 
-    private func initView() {
-        let attributedString = NSAttributedString(string: title, attributes: [.foregroundColor: textColor])
-        attributedTitle = attributedString
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        updateAttributedTitle()
+    }
+
+    private func updateAttributedTitle() {
+        // NSColor の dynamic color はレンダリング時に appearance に合わせて解決される
+        attributedTitle = NSAttributedString(string: title, attributes: [.foregroundColor: textColor])
     }
 }

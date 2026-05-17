@@ -72,7 +72,7 @@
                                         <rect key="frame" x="1" y="8" width="48" height="12"/>
                                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="General" id="qS1-uo-9im">
                                             <font key="font" size="9" name="HiraKakuProN-W6"/>
-                                            <color key="textColor" name="linkColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                         </textFieldCell>
                                     </textField>
