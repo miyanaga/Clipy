@@ -95,18 +95,27 @@ extension CPYPreferencesWindowController: NSWindowDelegate {
 
 // MARK: - Layout
 private extension CPYPreferencesWindowController {
+    // SF Symbols: 元の PNG アイコンは template 非対応のため SF Symbols に置き換え
+    private static let tabSymbols = [
+        "gearshape",          // 一般
+        "list.bullet",        // メニュー
+        "doc.text",           // 対応形式
+        "minus.circle",       // 除外アプリ
+        "command",            // ショートカット
+        "arrow.clockwise",    // アップデート
+        "flask",              // ベータ機能
+    ]
+
     func resetImages() {
         let imageViews = [generalImageView, menuImageView, typeImageView,
                           excludeImageView, shortcutsImageView, updatesImageView, betaImageView]
-        let assets: [ImageAsset] = [Asset.prefGeneral, Asset.prefMenu, Asset.prefType,
-                                    Asset.prefExcluded, Asset.prefShortcut, Asset.prefUpdate, Asset.prefBeta]
         let textFields = [generalTextField, menuTextField, typeTextField,
                           excludeTextField, shortcutsTextField, updatesTextField, betaTextField]
+        let cfg = NSImage.SymbolConfiguration(pointSize: 22, weight: .regular)
 
-        zip(imageViews, assets).forEach { imageView, asset in
-            let img = asset.image
-            img.isTemplate = true
-            imageView?.image = img
+        zip(imageViews, Self.tabSymbols).forEach { imageView, symbol in
+            imageView?.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)?
+                .withSymbolConfiguration(cfg)
             imageView?.contentTintColor = .secondaryLabelColor
         }
         textFields.forEach { $0?.textColor = .secondaryLabelColor }
