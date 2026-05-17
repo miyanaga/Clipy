@@ -17,49 +17,46 @@ import Cocoa
 
     // MARK: - Properties
     @IBInspectable var backgroundColor: NSColor = .clear {
-        didSet {
-            needsDisplay = true
-        }
+        didSet { needsDisplay = true }
     }
     @IBInspectable var borderColor: NSColor = .clear {
-        didSet {
-            needsDisplay = true
-        }
+        didSet { needsDisplay = true }
     }
     @IBInspectable var borderWidth: CGFloat = 0 {
-        didSet {
-            needsDisplay = true
-        }
+        didSet { needsDisplay = true }
     }
     @IBInspectable var cornerRadius: CGFloat = 0 {
-        didSet {
-            needsDisplay = true
-        }
+        didSet { needsDisplay = true }
     }
-    override var wantsUpdateLayer: Bool {
-        return true
-    }
+
+    override var wantsUpdateLayer: Bool { true }
 
     // MARK: - Initialize
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
+        wantsLayer = true
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+        wantsLayer = true
     }
 
-    // MARK: - Update
-    override func draw(_ dirtyRect: NSRect) {
-        // Background
-        backgroundColor.setFill()
-        NSBezierPath(roundedRect: bounds, xRadius: cornerRadius, yRadius: cornerRadius).fill()
-        // Border
-        let rect = NSRect(x: borderWidth / 2, y: borderWidth / 2, width: bounds.width - borderWidth, height: bounds.height - borderWidth)
-        let path = NSBezierPath(roundedRect: rect, xRadius: cornerRadius, yRadius: cornerRadius)
-        path.lineWidth = borderWidth
-        borderColor.set()
-        path.stroke()
+    // MARK: - Appearance
+    // NSColor のダイナミックカラーはアピアランスのコンテキストで解決する必要がある
+    override func updateLayer() {
+        let appearance = effectiveAppearance
+        appearance.performAsCurrentDrawingAppearance {
+            layer?.backgroundColor = backgroundColor.cgColor
+            layer?.cornerRadius    = cornerRadius
+            layer?.borderColor     = borderColor.cgColor
+            layer?.borderWidth     = borderWidth
+        }
     }
 
+    // ライト ↔ ダーク切替時に再描画
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        needsDisplay = true
+    }
 }
