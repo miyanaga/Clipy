@@ -1,0 +1,228 @@
+name: Release
+
+# tag v*.*.* をプッシュすると起動
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode_26.2.app/Contents/Developer
+  SCHEME: Clipy
+  BUILD_PATH: ${{ github.workspace }}/build/DerivedData
+  APP_PATH: ${{ github.workspace }}/build/DerivedData/Build/Products/Release/Clipy.app
+
+# ── 必要な GitHub Secrets ────────────────────────────────────────────────────
+# APPLE_CERTIFICATE        : Developer ID Application 証明書 (.p12 を base64)
+#                            export: base64 -i Certificates.p12 | tr -d '\n'
+# APPLE_CERTIFICATE_PASSWORD: .p12 のエクスポートパスワード
+# KEYCHAIN_PASSWORD        : 一時キーチェーン用（任意のランダム文字列）
+#                            generate: openssl rand -base64 20
+# APPLE_SIGNING_IDENTITY   : "Developer ID Application: 氏名 (TEAM_ID)"
+# APPLE_TEAM_ID            : developer.apple.com のチーム ID (10文字英数字)
+# NOTARY_KEY_ID            : App Store Connect API Key の Key ID
+# NOTARY_KEY               : .p8 ファイルを base64 エンコード
+#                            export: base64 -i AuthKey_XXXX.p8 | tr -d '\n'
+# NOTARY_ISSUER            : App Store Connect API の Issuer ID (UUID)
+# SPARKLE_KEY              : Sparkle EdDSA 秘密鍵 (Keychain から取得)
+#                            export: security find-generic-password \
+#                                      -s "https://sparkle-project.org" -w
+# ─────────────────────────────────────────────────────────────────────────────
+
+jobs:
+  release:
+    runs-on: macos-26
+    permissions:
+      contents: write   # GitHub Release の作成
+      pages: write      # appcast.xml の gh-pages 更新
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        fetch-depth: 0   # appcast 更新時に push するため全履歴を取得
+
+    - name: Extract version
+      id: version
+      run: |
+        VERSION="${GITHUB_REF_NAME#v}"
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "tag=$GITHUB_REF_NAME" >> $GITHUB_OUTPUT
+
+    # ── Ruby / CocoaPods ───────────────────────────────────────────────────
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@c4e5b1316158f92e3d49443a9d58b31d25ac0f8f # v1.306.0
+      with:
+        ruby-version: '3.4'
+        bundler-cache: true
+
+    - name: Cache CocoaPods
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        path: Pods
+        key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pods-
+
+    - name: Pod install
+      run: bundle exec pod install
+
+    # ── コード署名証明書のインポート ─────────────────────────────────────
+    - name: Import signing certificate
+      env:
+        CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE }}
+        CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+      run: |
+        KEYCHAIN_PATH=$RUNNER_TEMP/signing.keychain-db
+
+        # 一時キーチェーン作成
+        security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+        security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+        security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+        # 証明書インポート
+        CERT_PATH=$RUNNER_TEMP/cert.p12
+        echo -n "$CERTIFICATE_BASE64" | base64 --decode -o "$CERT_PATH"
+        security import "$CERT_PATH" \
+          -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+
+        # codesign がキーチェーンにアクセスできるよう設定
+        security set-key-partition-list \
+          -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+        security list-keychain -d user -s "$KEYCHAIN_PATH"
+
+    # ── ビルド (Release + Hardened Runtime) ───────────────────────────────
+    - name: Build
+      env:
+        SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+        TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      run: |
+        xcodebuild \
+          -workspace Clipy.xcworkspace \
+          -scheme "$SCHEME" \
+          -configuration Release \
+          -derivedDataPath "$BUILD_PATH" \
+          CODE_SIGN_IDENTITY="$SIGNING_IDENTITY" \
+          CODE_SIGN_STYLE=Manual \
+          DEVELOPMENT_TEAM="$TEAM_ID" \
+          CODE_SIGN_ENTITLEMENTS="Clipy/Clipy.entitlements" \
+          ENABLE_HARDENED_RUNTIME=YES \
+          build
+
+    # ── 公証 (notarize) ───────────────────────────────────────────────────
+    - name: Notarize
+      env:
+        NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+        NOTARY_KEY_BASE64: ${{ secrets.NOTARY_KEY }}
+        NOTARY_ISSUER: ${{ secrets.NOTARY_ISSUER }}
+      run: |
+        # App Store Connect API Key を配置
+        KEY_DIR=~/.private_keys
+        mkdir -p "$KEY_DIR"
+        echo -n "$NOTARY_KEY_BASE64" | base64 --decode \
+          > "$KEY_DIR/AuthKey_${NOTARY_KEY_ID}.p8"
+
+        # 公証用 zip 作成
+        ZIP_PATH=$RUNNER_TEMP/Clipy_notarize.zip
+        ditto -c -k --keepParent "$APP_PATH" "$ZIP_PATH"
+
+        # 公証申請 (完了まで待機)
+        xcrun notarytool submit "$ZIP_PATH" \
+          --key "$KEY_DIR/AuthKey_${NOTARY_KEY_ID}.p8" \
+          --key-id "$NOTARY_KEY_ID" \
+          --issuer "$NOTARY_ISSUER" \
+          --wait \
+          --timeout 30m
+
+        # ステープル
+        xcrun stapler staple "$APP_PATH"
+
+        rm -f "$KEY_DIR/AuthKey_${NOTARY_KEY_ID}.p8"
+
+    # ── DMG 作成 ──────────────────────────────────────────────────────────
+    - name: Create DMG
+      run: |
+        VERSION="${{ steps.version.outputs.version }}"
+        DMG_PATH="${{ github.workspace }}/build/Clipy-${VERSION}.dmg"
+
+        brew install create-dmg
+
+        create-dmg \
+          --volname "Clipy" \
+          --volicon "$APP_PATH/Contents/Resources/Images.xcassets/AppIcon.appiconset/icon_512x512@2x.png" \
+          --window-pos 200 120 \
+          --window-size 600 400 \
+          --icon-size 100 \
+          --icon "Clipy.app" 175 190 \
+          --hide-extension "Clipy.app" \
+          --app-drop-link 425 190 \
+          "$DMG_PATH" \
+          "$APP_PATH"
+
+        echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
+
+    # ── DMG に署名 ────────────────────────────────────────────────────────
+    - name: Sign DMG
+      env:
+        SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+      run: |
+        codesign --sign "$SIGNING_IDENTITY" "$DMG_PATH"
+
+    # ── Sparkle EdDSA 署名 ───────────────────────────────────────────────
+    - name: Generate Sparkle signature
+      id: sparkle
+      env:
+        SPARKLE_KEY_BASE64: ${{ secrets.SPARKLE_KEY }}
+      run: |
+        KEY_PATH=$RUNNER_TEMP/sparkle_private.key
+        echo -n "$SPARKLE_KEY_BASE64" | base64 --decode > "$KEY_PATH"
+
+        SIGNATURE=$(Pods/Sparkle/bin/sign_update \
+          --ed-key-file "$KEY_PATH" "$DMG_PATH")
+
+        echo "signature=$SIGNATURE" >> $GITHUB_OUTPUT
+
+        rm -f "$KEY_PATH"
+
+    # ── GitHub Release 作成 & DMG アップロード ───────────────────────────
+    - name: Create GitHub Release
+      id: release
+      uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
+      with:
+        files: ${{ env.DMG_PATH }}
+        generate_release_notes: true
+        draft: false
+        prerelease: ${{ contains(steps.version.outputs.version, '-') }}
+
+    # ── appcast.xml の更新 ────────────────────────────────────────────────
+    - name: Update appcast.xml
+      env:
+        VERSION: ${{ steps.version.outputs.version }}
+        TAG: ${{ steps.version.outputs.tag }}
+        SPARKLE_SIGNATURE: ${{ steps.sparkle.outputs.signature }}
+        DMG_URL: ${{ fromJson(steps.release.outputs.assets)[0].browser_download_url }}
+      run: |
+        DMG_SIZE=$(stat -f%z "$DMG_PATH")
+        python3 scripts/update_appcast.py \
+          --appcast docs/appcast.xml \
+          --version "$VERSION" \
+          --tag "$TAG" \
+          --url "$DMG_URL" \
+          --size "$DMG_SIZE" \
+          --signature "$SPARKLE_SIGNATURE" \
+          --min-os "13.0"
+
+    - name: Commit and push appcast.xml
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add docs/appcast.xml
+        git commit -m "Update appcast.xml for ${{ steps.version.outputs.tag }}"
+        git push origin HEAD:${{ github.event.repository.default_branch }}
+
+    # ── 一時キーチェーンを削除 ───────────────────────────────────────────
+    - name: Cleanup keychain
+      if: always()
+      run: |
+        security delete-keychain $RUNNER_TEMP/signing.keychain-db 2>/dev/null || true

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+    <channel>
+        <title>Clipy</title>
+        <link>https://miyanaga.github.io/Clipy/appcast.xml</link>
+        <description>Clipy release updates</description>
+        <language>en</language>
+        <!-- リリースエントリは scripts/update_appcast.py によって自動生成されます -->
+    </channel>
+</rss>

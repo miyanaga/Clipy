@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  Hardened Runtime entitlements for Clipy.
+
+	  Clipy is not sandboxed (clipboard managers require broad system access).
+	  Accessibility permission is requested at runtime via NSAccessibility.
+	  All entitlements here are the minimum required for Hardened Runtime.
+	-->
+
+	<!-- Sparkle: check for updates over the network -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+</dict>
+</plist>
