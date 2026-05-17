@@ -62,11 +62,13 @@ final class CPYSnippetsEditorWindowController: NSWindowController {
     // MARK: - Window Life Cycle
     override func windowDidLoad() {
         super.windowDidLoad()
-        self.window?.collectionBehavior = NSWindow.CollectionBehavior.canJoinAllSpaces
-        self.window?.backgroundColor = NSColor(white: 0.99, alpha: 1)
-        if #available(OSX 10.10, *) {
-            self.window?.titlebarAppearsTransparent = true
-        }
+        window?.collectionBehavior = .canJoinAllSpaces
+        // Use system color so the window respects dark/light mode automatically
+        window?.backgroundColor = .windowBackgroundColor
+
+        // Replace the legacy custom toolbar view with a native NSToolbar
+        setupToolbar()
+
         // HACK: Copy as an object that does not put under Realm management.
         // https://github.com/realm/realm-cocoa/issues/1734
         let realm = try! Realm()
@@ -78,6 +80,30 @@ final class CPYSnippetsEditorWindowController: NSWindowController {
         if let folder = folders.first {
             outlineView.selectRowIndexes(IndexSet(integer: outlineView.row(forItem: folder)), byExtendingSelection: false)
             changeItemFocus()
+        }
+    }
+
+    private func setupToolbar() {
+        let toolbar = NSToolbar(identifier: "SnippetsEditorToolbar")
+        toolbar.delegate = self
+        toolbar.displayMode = .iconOnly
+        window?.toolbar = toolbar
+
+        // Hide the legacy XIB toolbar view and collapse it so the split view fills the window
+        guard let contentView = window?.contentView else { return }
+        // The legacy toolbar is the first non-NSSplitView subview pinned to the top
+        if let legacyBar = contentView.subviews.first(where: { !($0 is NSSplitView) }) {
+            legacyBar.isHidden = true
+            // Rewire: splitView.top → contentView.top (instead of legacyBar.bottom)
+            if let splitView = contentView.subviews.first(where: { $0 is NSSplitView }) {
+                for con in contentView.constraints where
+                    (con.firstItem as? NSView) == splitView &&
+                    con.firstAttribute == .top &&
+                    (con.secondItem as? NSView) == legacyBar {
+                    con.isActive = false
+                }
+                splitView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
+            }
         }
     }
 
@@ -489,4 +515,51 @@ extension CPYSnippetsEditorWindowController: RecordViewDelegate {
     }
 
     func recordViewDidEndRecording(_ recordView: RecordView) {}
+}
+
+// MARK: - NSToolbarDelegate
+extension CPYSnippetsEditorWindowController: NSToolbarDelegate {
+
+    private struct ToolbarItemInfo {
+        let identifier: String
+        let label: String
+        let symbol: String
+        let selector: Selector
+    }
+
+    private static let toolbarItems: [ToolbarItemInfo] = [
+        ToolbarItemInfo(identifier: "AddSnippet", label: "Add Snippet", symbol: "doc.badge.plus",       selector: #selector(addSnippetButtonTapped)),
+        ToolbarItemInfo(identifier: "AddFolder",  label: "Add Folder",  symbol: "folder.badge.plus",    selector: #selector(addFolderButtonTapped)),
+        ToolbarItemInfo(identifier: "Delete",     label: "Delete",      symbol: "trash",                selector: #selector(deleteButtonTapped)),
+        ToolbarItemInfo(identifier: "Toggle",     label: "Toggle",      symbol: "eye",                  selector: #selector(changeStatusButtonTapped)),
+        ToolbarItemInfo(identifier: "Import",     label: "Import",      symbol: "square.and.arrow.down", selector: #selector(importSnippetButtonTapped)),
+        ToolbarItemInfo(identifier: "Export",     label: "Export",      symbol: "square.and.arrow.up",  selector: #selector(exportSnippetButtonTapped)),
+    ]
+
+    func toolbar(
+        _ toolbar: NSToolbar,
+        itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier,
+        willBeInsertedIntoToolbar flag: Bool
+    ) -> NSToolbarItem? {
+        guard let info = Self.toolbarItems.first(where: { $0.identifier == itemIdentifier.rawValue }) else { return nil }
+        let item = NSToolbarItem(itemIdentifier: itemIdentifier)
+        item.label        = info.label
+        item.paletteLabel = info.label
+        item.image        = NSImage(systemSymbolName: info.symbol, accessibilityDescription: info.label)
+        item.action       = info.selector
+        item.target       = self
+        return item
+    }
+
+    func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
+        Self.toolbarItems.map { NSToolbarItem.Identifier($0.identifier) } + [.flexibleSpace, .space]
+    }
+
+    func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
+        [
+            .init("AddSnippet"), .init("AddFolder"), .init("Delete"),
+            .flexibleSpace,
+            .init("Toggle"), .init("Import"), .init("Export"),
+        ]
+    }
 }
