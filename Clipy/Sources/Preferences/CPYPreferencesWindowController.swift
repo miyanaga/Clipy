@@ -96,50 +96,33 @@ extension CPYPreferencesWindowController: NSWindowDelegate {
 // MARK: - Layout
 private extension CPYPreferencesWindowController {
     func resetImages() {
-        generalImageView.image = Asset.prefGeneral.image
-        menuImageView.image = Asset.prefMenu.image
-        typeImageView.image = Asset.prefType.image
-        excludeImageView.image = Asset.prefExcluded.image
-        shortcutsImageView.image = Asset.prefShortcut.image
-        updatesImageView.image = Asset.prefUpdate.image
-        betaImageView.image = Asset.prefBeta.image
+        let imageViews = [generalImageView, menuImageView, typeImageView,
+                          excludeImageView, shortcutsImageView, updatesImageView, betaImageView]
+        let assets: [ImageAsset] = [Asset.prefGeneral, Asset.prefMenu, Asset.prefType,
+                                    Asset.prefExcluded, Asset.prefShortcut, Asset.prefUpdate, Asset.prefBeta]
+        let textFields = [generalTextField, menuTextField, typeTextField,
+                          excludeTextField, shortcutsTextField, updatesTextField, betaTextField]
 
-        generalTextField.textColor = .secondaryLabelColor
-        menuTextField.textColor = .secondaryLabelColor
-        typeTextField.textColor = .secondaryLabelColor
-        excludeTextField.textColor = .secondaryLabelColor
-        shortcutsTextField.textColor = .secondaryLabelColor
-        updatesTextField.textColor = .secondaryLabelColor
-        betaTextField.textColor = .secondaryLabelColor
+        zip(imageViews, assets).forEach { imageView, asset in
+            let img = asset.image
+            img.isTemplate = true
+            imageView?.image = img
+            imageView?.contentTintColor = .secondaryLabelColor
+        }
+        textFields.forEach { $0?.textColor = .secondaryLabelColor }
     }
 
     func selectedTab(_ index: Int) {
         resetImages()
 
-        switch index {
-        case 0:
-            generalImageView.image = Asset.prefGeneralOn.image
-            generalTextField.textColor = .controlAccentColor
-        case 1:
-            menuImageView.image = Asset.prefMenuOn.image
-            menuTextField.textColor = .controlAccentColor
-        case 2:
-            typeImageView.image = Asset.prefTypeOn.image
-            typeTextField.textColor = .controlAccentColor
-        case 3:
-            excludeImageView.image = Asset.prefExcludedOn.image
-            excludeTextField.textColor = .controlAccentColor
-        case 4:
-            shortcutsImageView.image = Asset.prefShortcutOn.image
-            shortcutsTextField.textColor = .controlAccentColor
-        case 5:
-            updatesImageView.image = Asset.prefUpdateOn.image
-            updatesTextField.textColor = .controlAccentColor
-        case 6:
-            betaImageView.image = Asset.prefBetaOn.image
-            betaTextField.textColor = .controlAccentColor
-        default: break
-        }
+        let imageViews = [generalImageView, menuImageView, typeImageView,
+                          excludeImageView, shortcutsImageView, updatesImageView, betaImageView]
+        let textFields = [generalTextField, menuTextField, typeTextField,
+                          excludeTextField, shortcutsTextField, updatesTextField, betaTextField]
+
+        guard index < imageViews.count else { return }
+        imageViews[index]?.contentTintColor = .controlAccentColor
+        textFields[index]?.textColor = .controlAccentColor
     }
 
     func switchView(_ index: Int) {

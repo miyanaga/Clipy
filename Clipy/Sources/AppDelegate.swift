@@ -175,8 +175,11 @@ extension AppDelegate: NSApplicationDelegate {
         CPYUtilities.registerUserDefaultKeys()
         // SDKs
         CPYUtilities.initSDKs()
-        // Check Accessibility Permission
-        AppEnvironment.current.accessibilityService.isAccessibilityEnabled(isPrompt: true)
+        // Check Accessibility Permission (quiet — prompt only when paste is attempted)
+        // isPrompt:true with ad-hoc signing causes the system dialog on every launch
+        // because each build gets a new code signature. The paste service will show
+        // showAccessibilityAuthenticationAlert() on demand when needed.
+        AppEnvironment.current.accessibilityService.isAccessibilityEnabled(isPrompt: false)
 
         // Show Login Item
         if !AppEnvironment.current.defaults.bool(forKey: Constants.UserDefaults.loginItem) && !AppEnvironment.current.defaults.bool(forKey: Constants.UserDefaults.suppressAlertForLoginItem) {
