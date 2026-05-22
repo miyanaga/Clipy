@@ -44,6 +44,9 @@ final class CPYSnippetsEditorWindowController: NSWindowController {
         }
     }
 
+    private var snippetTitleTextField: NSTextField?
+    private var snippetEditingForm: NSView?
+
     private var folders = [CPYFolder]()
     private var selectedSnippet: CPYSnippet? {
         guard let snippet = outlineView.item(atRow: outlineView.selectedRow) as? CPYSnippet else { return nil }
@@ -68,6 +71,7 @@ final class CPYSnippetsEditorWindowController: NSWindowController {
 
         // Replace the legacy custom toolbar view with a native NSToolbar
         setupToolbar()
+        setupSnippetEditingForm()
 
         // HACK: Copy as an object that does not put under Realm management.
         // https://github.com/realm/realm-cocoa/issues/1734
@@ -81,6 +85,96 @@ final class CPYSnippetsEditorWindowController: NSWindowController {
             outlineView.selectRowIndexes(IndexSet(integer: outlineView.row(forItem: folder)), byExtendingSelection: false)
             changeItemFocus()
         }
+    }
+
+    private func setupSnippetEditingForm() {
+        guard let scrollView = textView.enclosingScrollView,
+              let rightPanel = scrollView.superview else { return }
+
+        // Container for the snippet form (title bar at top)
+        let form = NSView()
+        form.translatesAutoresizingMaskIntoConstraints = false
+        form.isHidden = true
+        rightPanel.addSubview(form)
+
+        // Title label
+        let label = NSTextField(labelWithString: "Title")
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = NSFont.boldSystemFont(ofSize: 11)
+        label.textColor = .secondaryLabelColor
+        form.addSubview(label)
+
+        // Title text field
+        let titleField = NSTextField()
+        titleField.translatesAutoresizingMaskIntoConstraints = false
+        titleField.font = NSFont.systemFont(ofSize: 14)
+        titleField.placeholderString = "Snippet title"
+        titleField.isBordered = false
+        titleField.isBezeled = true
+        titleField.bezelStyle = .roundedBezel
+        titleField.target = self
+        titleField.action = #selector(snippetTitleFieldCommitted(_:))
+        form.addSubview(titleField)
+
+        // Separator
+        let separator = NSBox()
+        separator.translatesAutoresizingMaskIntoConstraints = false
+        separator.boxType = .separator
+        form.addSubview(separator)
+
+        NSLayoutConstraint.activate([
+            form.topAnchor.constraint(equalTo: rightPanel.topAnchor),
+            form.leadingAnchor.constraint(equalTo: rightPanel.leadingAnchor),
+            form.trailingAnchor.constraint(equalTo: rightPanel.trailingAnchor),
+
+            label.topAnchor.constraint(equalTo: form.topAnchor, constant: 12),
+            label.leadingAnchor.constraint(equalTo: form.leadingAnchor, constant: 16),
+
+            titleField.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 4),
+            titleField.leadingAnchor.constraint(equalTo: form.leadingAnchor, constant: 12),
+            titleField.trailingAnchor.constraint(equalTo: form.trailingAnchor, constant: -12),
+
+            separator.topAnchor.constraint(equalTo: titleField.bottomAnchor, constant: 12),
+            separator.leadingAnchor.constraint(equalTo: form.leadingAnchor),
+            separator.trailingAnchor.constraint(equalTo: form.trailingAnchor),
+            separator.bottomAnchor.constraint(equalTo: form.bottomAnchor),
+        ])
+
+        snippetTitleTextField = titleField
+        snippetEditingForm = form
+
+        // Rewire scrollView top: default sits at panel top; when form is visible it sits below form
+        for con in rightPanel.constraints where
+            (con.firstItem as? NSView) == scrollView && con.firstAttribute == .top {
+            con.isActive = false
+        }
+        let topToPanel = scrollView.topAnchor.constraint(equalTo: rightPanel.topAnchor)
+        topToPanel.identifier = "scrollTopToPanel"
+        topToPanel.isActive = true
+    }
+
+    private func updateScrollViewTopConstraint(showForm: Bool) {
+        guard let scrollView = textView.enclosingScrollView,
+              let rightPanel = scrollView.superview,
+              let form = snippetEditingForm else { return }
+
+        for con in rightPanel.constraints where
+            (con.firstItem as? NSView) == scrollView && con.firstAttribute == .top {
+            con.isActive = false
+        }
+        if showForm {
+            scrollView.topAnchor.constraint(equalTo: form.bottomAnchor).isActive = true
+        } else {
+            scrollView.topAnchor.constraint(equalTo: rightPanel.topAnchor).isActive = true
+        }
+    }
+
+    @objc private func snippetTitleFieldCommitted(_ sender: NSTextField) {
+        let text = sender.stringValue.trimmingCharacters(in: .whitespaces)
+        guard !text.isEmpty, let snippet = selectedSnippet else { return }
+        snippet.title = text
+        snippet.merge()
+        outlineView.reloadData()
     }
 
     private func setupToolbar() {
@@ -288,6 +382,8 @@ private extension CPYSnippetsEditorWindowController {
         guard let item = outlineView.item(atRow: outlineView.selectedRow) else {
             folderSettingView.isHidden = true
             textView.isHidden = true
+            snippetEditingForm?.isHidden = true
+            updateScrollViewTopConstraint(showForm: false)
             folderShortcutRecordView.keyCombo = nil
             folderTitleTextField.stringValue = ""
             return
@@ -298,11 +394,16 @@ private extension CPYSnippetsEditorWindowController {
             folderShortcutRecordView.keyCombo = AppEnvironment.current.hotKeyService.snippetKeyCombo(forIdentifier: folder.identifier)
             folderSettingView.isHidden = false
             textView.isHidden = true
+            snippetEditingForm?.isHidden = true
+            updateScrollViewTopConstraint(showForm: false)
         } else if let snippet = item as? CPYSnippet {
             textView.string = snippet.content
+            snippetTitleTextField?.stringValue = snippet.title
             folderTitleTextField.stringValue = ""
             folderShortcutRecordView.keyCombo = nil
             folderSettingView.isHidden = true
+            snippetEditingForm?.isHidden = false
+            updateScrollViewTopConstraint(showForm: true)
             textView.isHidden = false
         }
     }
