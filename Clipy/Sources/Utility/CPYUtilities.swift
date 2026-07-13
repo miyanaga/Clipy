@@ -70,6 +70,10 @@ final class CPYUtilities {
         defaultValues.updateValue(NSNumber(value: 0), forKey: Constants.Beta.pasteAndDeleteHistoryModifier)
         defaultValues.updateValue(NSNumber(value: false), forKey: Constants.Beta.observerScreenshot)
 
+        /* Snippet Sync */
+        defaultValues.updateValue(NSNumber(value: true), forKey: Constants.SnippetSync.enabled)
+        defaultValues.updateValue(SnippetSyncService.defaultDirectoryPath, forKey: Constants.SnippetSync.directory)
+
         AppEnvironment.current.defaults.register(defaults: defaultValues)
         AppEnvironment.current.defaults.synchronize()
     }

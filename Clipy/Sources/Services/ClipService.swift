@@ -91,6 +91,9 @@ extension ClipService {
         if !storeTypes.values.contains(NSNumber(value: true)) { return }
         // Pasteboard types
         let pasteboard = NSPasteboard.general
+        // Respect the concealed-content convention used by password managers
+        // (and by Clipy's own sync key export)
+        if pasteboard.availableType(from: [NSPasteboard.PasteboardType("org.nspasteboard.ConcealedType")]) != nil { return }
         let types = self.types(with: pasteboard)
         if types.isEmpty { return }
 

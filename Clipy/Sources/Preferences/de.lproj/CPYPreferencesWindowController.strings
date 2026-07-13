@@ -24,3 +24,6 @@
 
 /* Class = "NSTextFieldCell"; title = "Menu"; ObjectID = "vEM-JU-92T"; */
 "vEM-JU-92T.title" = "Menü";
+
+/* Class = "NSTextFieldCell"; title = "Sync"; ObjectID = "syt-tf-1c"; */
+"syt-tf-1c.title" = "Sync";

@@ -54,6 +54,12 @@
 		FA1DB5161DDCB4C0007F95C8 /* CPYShortcutsPreferenceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1DB4F41DDCB4C0007F95C8 /* CPYShortcutsPreferenceViewController.swift */; };
 		FA1DB5171DDCB4C0007F95C8 /* CPYTypePreferenceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1DB4F51DDCB4C0007F95C8 /* CPYTypePreferenceViewController.swift */; };
 		FA1DB5181DDCB4C0007F95C8 /* CPYUpdatesPreferenceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1DB4F61DDCB4C0007F95C8 /* CPYUpdatesPreferenceViewController.swift */; };
+		AA11000000000000000000C1 /* SnippetSyncModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11000000000000000000A1 /* SnippetSyncModels.swift */; };
+		AA11000000000000000000C2 /* SnippetSyncCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11000000000000000000A2 /* SnippetSyncCrypto.swift */; };
+		AA11000000000000000000C3 /* SnippetSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11000000000000000000A3 /* SnippetSyncService.swift */; };
+		AA11000000000000000000C4 /* CPYSyncPreferenceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11000000000000000000A4 /* CPYSyncPreferenceViewController.swift */; };
+		AA11000000000000000000C5 /* CPYSyncPreferenceViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = AA11000000000000000000B1 /* CPYSyncPreferenceViewController.xib */; };
+		AA11000000000000000000C6 /* SnippetSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11000000000000000000A7 /* SnippetSyncTests.swift */; };
 		FA1DB5191DDCB4C0007F95C8 /* CPYBetaPreferenceViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = FA1DB4F71DDCB4C0007F95C8 /* CPYBetaPreferenceViewController.xib */; };
 		FA1DB51A1DDCB4C0007F95C8 /* CPYExcludeAppPreferenceViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = FA1DB4F91DDCB4C0007F95C8 /* CPYExcludeAppPreferenceViewController.xib */; };
 		FA1DB51B1DDCB4C0007F95C8 /* CPYGeneralPreferenceViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = FA1DB4FB1DDCB4C0007F95C8 /* CPYGeneralPreferenceViewController.xib */; };
@@ -194,6 +200,13 @@
 		FA1DB4F41DDCB4C0007F95C8 /* CPYShortcutsPreferenceViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CPYShortcutsPreferenceViewController.swift; sourceTree = "<group>"; };
 		FA1DB4F51DDCB4C0007F95C8 /* CPYTypePreferenceViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CPYTypePreferenceViewController.swift; sourceTree = "<group>"; };
 		FA1DB4F61DDCB4C0007F95C8 /* CPYUpdatesPreferenceViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CPYUpdatesPreferenceViewController.swift; sourceTree = "<group>"; };
+		AA11000000000000000000A1 /* SnippetSyncModels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SnippetSyncModels.swift; sourceTree = "<group>"; };
+		AA11000000000000000000A2 /* SnippetSyncCrypto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SnippetSyncCrypto.swift; sourceTree = "<group>"; };
+		AA11000000000000000000A3 /* SnippetSyncService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SnippetSyncService.swift; sourceTree = "<group>"; };
+		AA11000000000000000000A4 /* CPYSyncPreferenceViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CPYSyncPreferenceViewController.swift; sourceTree = "<group>"; };
+		AA11000000000000000000A5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/CPYSyncPreferenceViewController.xib; sourceTree = "<group>"; };
+		AA11000000000000000000A6 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/CPYSyncPreferenceViewController.strings; sourceTree = "<group>"; };
+		AA11000000000000000000A7 /* SnippetSyncTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SnippetSyncTests.swift; sourceTree = "<group>"; };
 		FA1DB50D1DDCB4C0007F95C8 /* CPYSnippetsEditorWindowController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CPYSnippetsEditorWindowController.swift; sourceTree = "<group>"; };
 		FA3778921F3B691A003B5BAB /* AppEnvironment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		FA3778941F3B6920003B5BAB /* Environment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Environment.swift; sourceTree = "<group>"; };
@@ -301,6 +314,9 @@
 				FAC0DCF01DE576F300309C49 /* PasteService.swift */,
 				FA1189321E4CD58C00244F12 /* ExcludeAppService.swift */,
 				FAA4BCCB2163DC9100FF5D18 /* AccessibilityService.swift */,
+				AA11000000000000000000A1 /* SnippetSyncModels.swift */,
+				AA11000000000000000000A2 /* SnippetSyncCrypto.swift */,
+				AA11000000000000000000A3 /* SnippetSyncService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -478,6 +494,8 @@
 				FA1DB4FF1DDCB4C0007F95C8 /* CPYShortcutsPreferenceViewController.xib */,
 				FA1DB5011DDCB4C0007F95C8 /* CPYTypePreferenceViewController.xib */,
 				FA1DB5031DDCB4C0007F95C8 /* CPYUpdatesPreferenceViewController.xib */,
+				AA11000000000000000000A4 /* CPYSyncPreferenceViewController.swift */,
+				AA11000000000000000000B1 /* CPYSyncPreferenceViewController.xib */,
 			);
 			path = Panels;
 			sourceTree = "<group>";
@@ -539,6 +557,7 @@
 				FA6167931D3ACCB90049FA14 /* DraggedDataTests.swift */,
 				FA6167911D3ABEB10049FA14 /* FolderTests.swift */,
 				FA6167951D3ACDD80049FA14 /* SnippetTests.swift */,
+				AA11000000000000000000A7 /* SnippetSyncTests.swift */,
 				FAC43DDC1B35D8B100C06102 /* Supporting Files */,
 			);
 			path = ClipyTests;
@@ -657,6 +676,7 @@
 				FA1DB4901DDCA5D9007F95C8 /* Images.xcassets in Resources */,
 				FA1DB51D1DDCB4C0007F95C8 /* CPYShortcutsPreferenceViewController.xib in Resources */,
 				FA1DB51F1DDCB4C0007F95C8 /* CPYUpdatesPreferenceViewController.xib in Resources */,
+				AA11000000000000000000C5 /* CPYSyncPreferenceViewController.xib in Resources */,
 				FA1DB51C1DDCB4C0007F95C8 /* CPYMenuPreferenceViewController.xib in Resources */,
 				FA1DB51B1DDCB4C0007F95C8 /* CPYGeneralPreferenceViewController.xib in Resources */,
 				FA1DB51A1DDCB4C0007F95C8 /* CPYExcludeAppPreferenceViewController.xib in Resources */,
@@ -842,6 +862,10 @@
 				FA1DB4E91DDCB49C007F95C8 /* CPYSplitView.swift in Sources */,
 				FA1DB4E81DDCB49C007F95C8 /* CPYDesignableView.swift in Sources */,
 				FA1DB5181DDCB4C0007F95C8 /* CPYUpdatesPreferenceViewController.swift in Sources */,
+				AA11000000000000000000C1 /* SnippetSyncModels.swift in Sources */,
+				AA11000000000000000000C2 /* SnippetSyncCrypto.swift in Sources */,
+				AA11000000000000000000C3 /* SnippetSyncService.swift in Sources */,
+				AA11000000000000000000C4 /* CPYSyncPreferenceViewController.swift in Sources */,
 				FA1DB4D41DDCB479007F95C8 /* CPYClipData.swift in Sources */,
 				FA1DB4B71DDCB452007F95C8 /* NSImage+Resize.swift in Sources */,
 				FA1DB4D51DDCB479007F95C8 /* CPYDraggedData.swift in Sources */,
@@ -872,6 +896,7 @@
 				FA6167921D3ABEB10049FA14 /* FolderTests.swift in Sources */,
 				FA08EDF81D1FED7D000D1D13 /* HotKeyServiceTests.swift in Sources */,
 				FA6167961D3ACDD80049FA14 /* SnippetTests.swift in Sources */,
+				AA11000000000000000000C6 /* SnippetSyncTests.swift in Sources */,
 				FA6167941D3ACCB90049FA14 /* DraggedDataTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -993,6 +1018,15 @@
 				54ADE1012008F64100239852 /* zh-Hans */,
 			);
 			name = CPYUpdatesPreferenceViewController.xib;
+			sourceTree = "<group>";
+		};
+		AA11000000000000000000B1 /* CPYSyncPreferenceViewController.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				AA11000000000000000000A5 /* Base */,
+				AA11000000000000000000A6 /* ja */,
+			);
+			name = CPYSyncPreferenceViewController.xib;
 			sourceTree = "<group>";
 		};
 		FA1DB50F1DDCB4C0007F95C8 /* CPYSnippetsEditorWindowController.xib */ = {

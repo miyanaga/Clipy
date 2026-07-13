@@ -85,6 +85,11 @@ struct Constants {
         static let checkInterval = "kCPYUpdateCheckIntervalKey"
     }
 
+    struct SnippetSync {
+        static let enabled = "kCPYSnippetSyncEnabled"
+        static let directory = "kCPYSnippetSyncDirectory"
+    }
+
     struct Notification {
         static let closeSnippetEditor = "kCPYSnippetEditorWillCloseNotification"
     }

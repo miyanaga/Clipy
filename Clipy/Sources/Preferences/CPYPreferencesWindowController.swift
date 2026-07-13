@@ -25,6 +25,7 @@ final class CPYPreferencesWindowController: NSWindowController {
     @IBOutlet private weak var shortcutsImageView: NSImageView!
     @IBOutlet private weak var updatesImageView: NSImageView!
     @IBOutlet private weak var betaImageView: NSImageView!
+    @IBOutlet private weak var syncImageView: NSImageView!
     // Labels
     @IBOutlet private weak var generalTextField: NSTextField!
     @IBOutlet private weak var menuTextField: NSTextField!
@@ -33,6 +34,7 @@ final class CPYPreferencesWindowController: NSWindowController {
     @IBOutlet private weak var shortcutsTextField: NSTextField!
     @IBOutlet private weak var updatesTextField: NSTextField!
     @IBOutlet private weak var betaTextField: NSTextField!
+    @IBOutlet private weak var syncTextField: NSTextField!
     // Buttons
     @IBOutlet private weak var generalButton: NSButton!
     @IBOutlet private weak var menuButton: NSButton!
@@ -41,6 +43,7 @@ final class CPYPreferencesWindowController: NSWindowController {
     @IBOutlet private weak var shortcutsButton: NSButton!
     @IBOutlet private weak var updatesButton: NSButton!
     @IBOutlet private weak var betaButton: NSButton!
+    @IBOutlet private weak var syncButton: NSButton!
     // ViewController
     private let viewController = [NSViewController(nibName: "CPYGeneralPreferenceViewController", bundle: nil),
                                   NSViewController(nibName: "CPYMenuPreferenceViewController", bundle: nil),
@@ -48,7 +51,8 @@ final class CPYPreferencesWindowController: NSWindowController {
                                   CPYExcludeAppPreferenceViewController(nibName: "CPYExcludeAppPreferenceViewController", bundle: nil),
                                   CPYShortcutsPreferenceViewController(nibName: "CPYShortcutsPreferenceViewController", bundle: nil),
                                   CPYUpdatesPreferenceViewController(nibName: "CPYUpdatesPreferenceViewController", bundle: nil),
-                                  CPYBetaPreferenceViewController(nibName: "CPYBetaPreferenceViewController", bundle: nil)]
+                                  CPYBetaPreferenceViewController(nibName: "CPYBetaPreferenceViewController", bundle: nil),
+                                  CPYSyncPreferenceViewController(nibName: "CPYSyncPreferenceViewController", bundle: nil)]
 
     // MARK: - Window Life Cycle
     override func windowDidLoad() {
@@ -63,6 +67,7 @@ final class CPYPreferencesWindowController: NSWindowController {
         shortcutsButton.sendAction(on: .leftMouseDown)
         updatesButton.sendAction(on: .leftMouseDown)
         betaButton.sendAction(on: .leftMouseDown)
+        syncButton.sendAction(on: .leftMouseDown)
     }
 
     override func showWindow(_ sender: Any?) {
@@ -104,13 +109,14 @@ private extension CPYPreferencesWindowController {
         "command",            // ショートカット
         "arrow.clockwise",    // アップデート
         "flask",              // ベータ機能
+        "arrow.triangle.2.circlepath", // 同期
     ]
 
     func resetImages() {
         let imageViews = [generalImageView, menuImageView, typeImageView,
-                          excludeImageView, shortcutsImageView, updatesImageView, betaImageView]
+                          excludeImageView, shortcutsImageView, updatesImageView, betaImageView, syncImageView]
         let textFields = [generalTextField, menuTextField, typeTextField,
-                          excludeTextField, shortcutsTextField, updatesTextField, betaTextField]
+                          excludeTextField, shortcutsTextField, updatesTextField, betaTextField, syncTextField]
         let cfg = NSImage.SymbolConfiguration(pointSize: 22, weight: .regular)
 
         zip(imageViews, Self.tabSymbols).forEach { imageView, symbol in
@@ -125,9 +131,9 @@ private extension CPYPreferencesWindowController {
         resetImages()
 
         let imageViews = [generalImageView, menuImageView, typeImageView,
-                          excludeImageView, shortcutsImageView, updatesImageView, betaImageView]
+                          excludeImageView, shortcutsImageView, updatesImageView, betaImageView, syncImageView]
         let textFields = [generalTextField, menuTextField, typeTextField,
-                          excludeTextField, shortcutsTextField, updatesTextField, betaTextField]
+                          excludeTextField, shortcutsTextField, updatesTextField, betaTextField, syncTextField]
 
         guard index < imageViews.count else { return }
         imageViews[index]?.contentTintColor = .controlAccentColor

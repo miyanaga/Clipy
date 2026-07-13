@@ -8,6 +8,8 @@
 
 "Clear History" = "Clear History";
 
+"Copy sync key" = "Copy Sync Key";
+
 "Delete Item" = "Delete Item";
 
 "Don't Launch" = "Don't Launch";
@@ -18,6 +20,8 @@
 
 "History" = "History";
 
+"Import sync key" = "Import Sync Key";
+
 "Launch Clipy on system startup?" = "Launch Clipy on system startup?";
 
 "Launch on system startup" = "Launch on system startup";
@@ -25,6 +29,8 @@
 "Menu" = "Menu";
 
 "Open System Preferences" = "Open System Preferences";
+
+"Paste the sync key copied from another Mac" = "Paste the sync key copied from another Mac.";
 
 "Please allow Accessibility" = "Please allow Accessibility.";
 
@@ -37,6 +43,34 @@
 "Shortcuts" = "Shortcuts";
 
 "Snippet" = "Snippet";
+
+"Snippet sync corrupt bundle" = "The sync data could not be read.";
+
+"Snippet sync directory unavailable %@" = "The sync folder is not available: %@";
+
+"Snippet sync disabled" = "Sync is turned off.";
+
+"Snippet sync downloading" = "Waiting for iCloud Drive to download the sync data…";
+
+"Snippet sync invalid key string" = "This is not a valid sync key.";
+
+"Snippet sync key copied" = "The sync key was copied to the clipboard. Import it on your other Macs, and treat it like a password.";
+
+"Snippet sync key local only" = "The sync key is stored only on this Mac. Copy it and import it on your other Macs.";
+
+"Snippet sync key mismatch" = "The sync data was encrypted with a different key. Import the sync key from another Mac.";
+
+"Snippet sync key synced" = "The sync key is stored in iCloud Keychain and follows your Apple ID.";
+
+"Snippet sync never" = "Waiting for the first sync…";
+
+"Snippet sync synced at %@" = "Last synced: %@";
+
+"Snippet sync syncing" = "Syncing…";
+
+"Snippet sync unsupported format" = "The sync data was created by a newer version of Clipy.";
+
+"Snippet sync waiting for key" = "Waiting for the sync key to arrive via iCloud Keychain. You can also import it manually.";
 
 "To do this action please allow Accessibility in Security Privacy preferences located in System Preferences" = "To do this action please allow Accessibility in Security & Privacy preferences, located in System Preferences.";
 

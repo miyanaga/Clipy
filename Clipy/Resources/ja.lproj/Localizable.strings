@@ -8,6 +8,8 @@
 
 "Clear History" = "履歴をクリア";
 
+"Copy sync key" = "同期キーをコピー";
+
 "Delete Item" = "スニペットを削除";
 
 "Don't Launch" = "起動しない";
@@ -18,6 +20,8 @@
 
 "History" = "履歴";
 
+"Import sync key" = "同期キーを読み込む";
+
 "Launch Clipy on system startup?" = "システム起動時にClipyを起動しますか?";
 
 "Launch on system startup" = "起動する";
@@ -25,6 +29,8 @@
 "Menu" = "メニュー";
 
 "Open System Preferences" = "\"システム環境設定\"を開く";
+
+"Paste the sync key copied from another Mac" = "他のMacでコピーした同期キーを貼り付けてください。";
 
 "Please allow Accessibility" = "アクセシビリティを有効にしてください。";
 
@@ -37,6 +43,34 @@
 "Shortcuts" = "ショートカット";
 
 "Snippet" = "スニペット";
+
+"Snippet sync corrupt bundle" = "同期データを読み込めませんでした。";
+
+"Snippet sync directory unavailable %@" = "同期フォルダを利用できません: %@";
+
+"Snippet sync disabled" = "同期はオフになっています。";
+
+"Snippet sync downloading" = "iCloud Driveが同期データをダウンロードするのを待っています…";
+
+"Snippet sync invalid key string" = "有効な同期キーではありません。";
+
+"Snippet sync key copied" = "同期キーをクリップボードにコピーしました。他のMacで読み込み、パスワードと同様に扱ってください。";
+
+"Snippet sync key local only" = "同期キーはこのMacにのみ保存されています。コピーして他のMacで読み込んでください。";
+
+"Snippet sync key mismatch" = "同期データは別のキーで暗号化されています。他のMacから同期キーを読み込んでください。";
+
+"Snippet sync key synced" = "同期キーはiCloudキーチェーンに保存され、Apple IDに追従します。";
+
+"Snippet sync never" = "最初の同期を待っています…";
+
+"Snippet sync synced at %@" = "最終同期: %@";
+
+"Snippet sync syncing" = "同期中…";
+
+"Snippet sync unsupported format" = "同期データは新しいバージョンのClipyで作成されています。";
+
+"Snippet sync waiting for key" = "iCloudキーチェーン経由で同期キーが届くのを待っています。手動で読み込むこともできます。";
 
 "To do this action please allow Accessibility in Security Privacy preferences located in System Preferences" = "この動作を行うためにはシステム環境設定の\"セキュリティとプライバシー\"環境設定で、Clipyへのアクセシビリティのアクセスを許可してください。";
 

@@ -22,6 +22,9 @@
                 <outlet property="shortcutsButton" destination="iGA-ys-nmA" id="tZr-ZR-VPv"/>
                 <outlet property="shortcutsImageView" destination="Rws-24-H8e" id="xRi-2I-gQg"/>
                 <outlet property="shortcutsTextField" destination="1CN-v1-FRq" id="JBc-gQ-Mep"/>
+                <outlet property="syncButton" destination="syt-bt-001" id="syt-cn-001"/>
+                <outlet property="syncImageView" destination="syt-iv-001" id="syt-cn-002"/>
+                <outlet property="syncTextField" destination="syt-tf-001" id="syt-cn-003"/>
                 <outlet property="toolBar" destination="DB4-0I-ThE" id="1UW-2V-JTB"/>
                 <outlet property="typeButton" destination="re2-ih-xqq" id="amJ-Th-Owc"/>
                 <outlet property="typeImageView" destination="o3h-5z-gAo" id="vLK-jc-GxL"/>
@@ -365,6 +368,50 @@
                                     <constraint firstItem="KnF-V7-1F2" firstAttribute="top" secondItem="LzX-pA-tjM" secondAttribute="top" constant="8" id="q7l-tP-IgV"/>
                                 </constraints>
                             </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="syt-vw-tab">
+                                <rect key="frame" x="359" y="0.0" width="50" height="56"/>
+                                <subviews>
+                                    <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" tag="7" translatesAutoresizingMaskIntoConstraints="NO" id="syt-iv-001">
+                                        <rect key="frame" x="7" y="24" width="36" height="24"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="24" id="syt-ct-001"/>
+                                            <constraint firstAttribute="width" constant="36" id="syt-ct-002"/>
+                                        </constraints>
+                                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="syt-ic-001"/>
+                                    </imageView>
+                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="syt-tf-001">
+                                        <rect key="frame" x="1" y="8" width="48" height="12"/>
+                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Sync" id="syt-tf-1c">
+                                            <font key="font" size="9" name="HiraKakuProN-W6"/>
+                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                        </textFieldCell>
+                                    </textField>
+                                    <button verticalHuggingPriority="750" tag="7" translatesAutoresizingMaskIntoConstraints="NO" id="syt-bt-001">
+                                        <rect key="frame" x="0.0" y="0.0" width="50" height="56"/>
+                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" alignment="center" transparent="YES" imageScaling="proportionallyDown" inset="2" id="syt-bc-001">
+                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                            <font key="font" metaFont="system"/>
+                                        </buttonCell>
+                                        <connections>
+                                            <action selector="toolBarItemTapped:" target="-2" id="syt-cn-004"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="syt-bt-001" firstAttribute="leading" secondItem="syt-vw-tab" secondAttribute="leading" id="syt-ct-003"/>
+                                    <constraint firstItem="syt-tf-001" firstAttribute="leading" secondItem="syt-vw-tab" secondAttribute="leading" constant="3" id="syt-ct-004"/>
+                                    <constraint firstAttribute="bottom" secondItem="syt-bt-001" secondAttribute="bottom" id="syt-ct-005"/>
+                                    <constraint firstItem="syt-tf-001" firstAttribute="top" secondItem="syt-iv-001" secondAttribute="bottom" constant="4" id="syt-ct-006"/>
+                                    <constraint firstAttribute="trailing" secondItem="syt-bt-001" secondAttribute="trailing" id="syt-ct-007"/>
+                                    <constraint firstAttribute="bottom" secondItem="syt-tf-001" secondAttribute="bottom" constant="8" id="syt-ct-008"/>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="50" id="syt-ct-009"/>
+                                    <constraint firstAttribute="trailing" secondItem="syt-tf-001" secondAttribute="trailing" constant="3" id="syt-ct-010"/>
+                                    <constraint firstItem="syt-iv-001" firstAttribute="centerX" secondItem="syt-vw-tab" secondAttribute="centerX" id="syt-ct-011"/>
+                                    <constraint firstItem="syt-bt-001" firstAttribute="top" secondItem="syt-vw-tab" secondAttribute="top" id="syt-ct-012"/>
+                                    <constraint firstItem="syt-iv-001" firstAttribute="top" secondItem="syt-vw-tab" secondAttribute="top" constant="8" id="syt-ct-013"/>
+                                </constraints>
+                            </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="RKs-Gr-vpv" customClass="CPYDesignableView" customModule="Clipy" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="0.0" width="480" height="1"/>
                                 <constraints>
@@ -394,6 +441,9 @@
                             <constraint firstItem="oZv-f1-ez4" firstAttribute="leading" secondItem="Eo5-Xw-WPV" secondAttribute="trailing" id="eeC-iS-g5z"/>
                             <constraint firstAttribute="bottom" secondItem="d0L-ue-dHf" secondAttribute="bottom" id="fc1-Il-8He"/>
                             <constraint firstItem="LzX-pA-tjM" firstAttribute="leading" secondItem="bgn-yY-thR" secondAttribute="trailing" id="k3i-xi-Nzt"/>
+                            <constraint firstItem="syt-vw-tab" firstAttribute="leading" secondItem="LzX-pA-tjM" secondAttribute="trailing" id="syt-ct-014"/>
+                            <constraint firstItem="syt-vw-tab" firstAttribute="top" secondItem="DB4-0I-ThE" secondAttribute="top" id="syt-ct-015"/>
+                            <constraint firstAttribute="bottom" secondItem="syt-vw-tab" secondAttribute="bottom" id="syt-ct-016"/>
                             <constraint firstItem="Tm1-Ve-7A5" firstAttribute="top" secondItem="DB4-0I-ThE" secondAttribute="top" id="mLx-hj-SgI"/>
                             <constraint firstItem="d0L-ue-dHf" firstAttribute="leading" secondItem="qLI-td-kAj" secondAttribute="trailing" id="ok5-iH-56k"/>
                             <constraint firstItem="Eo5-Xw-WPV" firstAttribute="top" secondItem="DB4-0I-ThE" secondAttribute="top" id="pmH-u2-Tu6"/>

@@ -1,0 +1,29 @@
+/* Class = "NSButtonCell"; title = "Sync snippets between your Macs"; ObjectID = "syn-cb-cel"; */
+"syn-cb-cel.title" = "Mac間でスニペットを同期する";
+
+/* Class = "NSTextFieldCell"; title = "Sync Folder:"; ObjectID = "syn-lb-1c"; */
+"syn-lb-1c.title" = "同期フォルダ:";
+
+/* Class = "NSButtonCell"; title = "Change…"; ObjectID = "syn-bt-chc"; */
+"syn-bt-chc.title" = "変更…";
+
+/* Class = "NSButtonCell"; title = "Use iCloud Drive Folder"; ObjectID = "syn-bt-rsc"; */
+"syn-bt-rsc.title" = "iCloud Driveフォルダに戻す";
+
+/* Class = "NSButtonCell"; title = "Sync Now"; ObjectID = "syn-bt-nwc"; */
+"syn-bt-nwc.title" = "今すぐ同期";
+
+/* Class = "NSButtonCell"; title = "Copy Sync Key"; ObjectID = "syn-bt-cpc"; */
+"syn-bt-cpc.title" = "同期キーをコピー";
+
+/* Class = "NSButtonCell"; title = "Import Sync Key…"; ObjectID = "syn-bt-imc"; */
+"syn-bt-imc.title" = "同期キーを読み込む…";
+
+/* Class = "NSTextFieldCell"; title = "path"; ObjectID = "syn-tf-dc"; */
+"syn-tf-dc.title" = "";
+
+/* Class = "NSTextFieldCell"; title = "Key"; ObjectID = "syn-tf-kc"; */
+"syn-tf-kc.title" = "";
+
+/* Class = "NSTextFieldCell"; title = "Status"; ObjectID = "syn-tf-sc"; */
+"syn-tf-sc.title" = "";

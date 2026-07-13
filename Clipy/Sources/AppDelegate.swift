@@ -198,6 +198,7 @@ extension AppDelegate: NSApplicationDelegate {
         AppEnvironment.current.dataCleanService.startMonitoring()
         AppEnvironment.current.excludeAppService.startMonitoring()
         AppEnvironment.current.hotKeyService.setupDefaultHotKeys()
+        AppEnvironment.current.snippetSyncService.startMonitoring()
 
         // Managers
         AppEnvironment.current.menuManager.setup()

@@ -45,3 +45,37 @@
 "Updates" = "Aktualisierungen";
 
 "You can change this setting in the Preferences if you want" = "Sie können diese Option in den Einstellungen ändern.";
+
+"Copy sync key" = "";
+
+"Import sync key" = "";
+
+"Paste the sync key copied from another Mac" = "";
+
+"Snippet sync corrupt bundle" = "";
+
+"Snippet sync directory unavailable %@" = "";
+
+"Snippet sync disabled" = "";
+
+"Snippet sync downloading" = "";
+
+"Snippet sync invalid key string" = "";
+
+"Snippet sync key copied" = "";
+
+"Snippet sync key local only" = "";
+
+"Snippet sync key mismatch" = "";
+
+"Snippet sync key synced" = "";
+
+"Snippet sync never" = "";
+
+"Snippet sync synced at %@" = "";
+
+"Snippet sync syncing" = "";
+
+"Snippet sync unsupported format" = "";
+
+"Snippet sync waiting for key" = "";
