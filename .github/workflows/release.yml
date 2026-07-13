@@ -125,7 +125,6 @@ jobs:
           CODE_SIGN_IDENTITY="$SIGNING_IDENTITY" \
           CODE_SIGN_STYLE=Manual \
           DEVELOPMENT_TEAM="$TEAM_ID" \
-          CODE_SIGN_ENTITLEMENTS="Clipy/Clipy.entitlements" \
           ENABLE_HARDENED_RUNTIME=YES \
           build
 
@@ -143,7 +142,6 @@ jobs:
           CODE_SIGN_IDENTITY="-" \
           CODE_SIGN_STYLE=Manual \
           DEVELOPMENT_TEAM="" \
-          CODE_SIGN_ENTITLEMENTS="Clipy/Clipy.entitlements" \
           build
 
     # ── 公証 (notarize) ───────────────────────────────────────────────────
