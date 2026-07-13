@@ -90,6 +90,7 @@ struct Constants {
     struct SnippetSync {
         static let enabled = "kCPYSnippetSyncEnabled"
         static let directory = "kCPYSnippetSyncDirectory"
+        static let syncPreferences = "kCPYSnippetSyncPreferences"
     }
 
     struct Notification {

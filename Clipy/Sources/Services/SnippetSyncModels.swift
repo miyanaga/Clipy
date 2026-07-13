@@ -61,6 +61,81 @@ struct SyncTombstone: Codable, Hashable {
     var deletedAt: Date
 }
 
+// MARK: - Preferences
+// A UserDefaults value in a JSON-encodable, deterministic form. NSNumber
+// booleans and integers must be told apart explicitly or a bool setting
+// would come back as 0/1 on the other machine.
+indirect enum SyncPreferenceValue: Codable, Equatable {
+    case bool(Bool)
+    case int(Int)
+    case double(Double)
+    case string(String)
+    case data(Data)
+    case array([SyncPreferenceValue])
+    case dictionary([String: SyncPreferenceValue])
+
+    init?(plist: Any) {
+        switch plist {
+        case let number as NSNumber:
+            if CFGetTypeID(number) == CFBooleanGetTypeID() {
+                self = .bool(number.boolValue)
+            } else if CFNumberIsFloatType(number) {
+                self = .double(number.doubleValue)
+            } else {
+                self = .int(number.intValue)
+            }
+        case let string as String:
+            self = .string(string)
+        case let data as Data:
+            self = .data(data)
+        case let array as [Any]:
+            var values = [SyncPreferenceValue]()
+            for element in array {
+                guard let value = SyncPreferenceValue(plist: element) else { return nil }
+                values.append(value)
+            }
+            self = .array(values)
+        case let dictionary as [String: Any]:
+            var values = [String: SyncPreferenceValue]()
+            for (key, element) in dictionary {
+                guard let value = SyncPreferenceValue(plist: element) else { return nil }
+                values[key] = value
+            }
+            self = .dictionary(values)
+        default:
+            return nil
+        }
+    }
+
+    var plistObject: Any {
+        switch self {
+        case .bool(let value): return value
+        case .int(let value): return value
+        case .double(let value): return value
+        case .string(let value): return value
+        case .data(let value): return value
+        case .array(let values): return values.map { $0.plistObject }
+        case .dictionary(let values): return values.mapValues { $0.plistObject }
+        }
+    }
+}
+
+struct SyncPreferences: Codable, Equatable {
+    var values: [String: SyncPreferenceValue]
+    var updatedAt: Date
+
+    private static let hashEncoder: JSONEncoder = {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        return encoder
+    }()
+
+    var contentHash: String {
+        let data = (try? SyncPreferences.hashEncoder.encode(values)) ?? Data()
+        return SnippetSyncHash.digest(of: [String(decoding: data, as: UTF8.self)])
+    }
+}
+
 // MARK: - Payload
 struct SyncPayload: Codable, Equatable {
     var formatVersion = 1
@@ -68,9 +143,11 @@ struct SyncPayload: Codable, Equatable {
     var folders: [SyncFolderItem]
     var snippets: [SyncSnippetItem]
     var tombstones: [SyncTombstone]
+    // Added in 1.4.0; absent in bundles written by older versions
+    var preferences: SyncPreferences?
 
     static func empty(exportedAt: Date) -> SyncPayload {
-        return SyncPayload(exportedAt: exportedAt, folders: [], snippets: [], tombstones: [])
+        return SyncPayload(exportedAt: exportedAt, folders: [], snippets: [], tombstones: [], preferences: nil)
     }
 }
 
@@ -87,6 +164,8 @@ struct SyncStateItem: Codable {
 struct SyncState: Codable {
     var directoryPath: String
     var items: [String: SyncStateItem]
+    var preferencesHash: String?
+    var preferencesUpdatedAt: Date?
 
     static func empty(directoryPath: String) -> SyncState {
         return SyncState(directoryPath: directoryPath, items: [:])
@@ -96,7 +175,10 @@ struct SyncState: Codable {
         var items = [String: SyncStateItem]()
         payload.folders.forEach { items[$0.identifier] = SyncStateItem(kind: .folder, hash: $0.contentHash, updatedAt: $0.updatedAt) }
         payload.snippets.forEach { items[$0.identifier] = SyncStateItem(kind: .snippet, hash: $0.contentHash, updatedAt: $0.updatedAt) }
-        return SyncState(directoryPath: directoryPath, items: items)
+        return SyncState(directoryPath: directoryPath,
+                         items: items,
+                         preferencesHash: payload.preferences?.contentHash,
+                         preferencesUpdatedAt: payload.preferences?.updatedAt)
     }
 }
 
@@ -121,6 +203,27 @@ enum SnippetSyncMerge {
         var payload: SyncPayload
         var localChanged: Bool
         var remoteChanged: Bool
+        // The merged preferences differ from the local ones and must be
+        // written back into UserDefaults
+        var preferencesChanged: Bool
+    }
+
+    /// Assigns updatedAt to the local preferences snapshot. A machine that has
+    /// never synced preferences gets `.distantPast`: right after an install the
+    /// local values are just registration defaults, and they must lose to any
+    /// real settings already in the bundle — a fresh machine adopts, it never
+    /// overwrites.
+    static func attributePreferences(_ values: [String: SyncPreferenceValue]?, state: SyncState, now: Date) -> SyncPreferences? {
+        guard let values = values else { return nil }
+        var preferences = SyncPreferences(values: values, updatedAt: now)
+        guard let stateHash = state.preferencesHash else {
+            preferences.updatedAt = .distantPast
+            return preferences
+        }
+        if stateHash == preferences.contentHash {
+            preferences.updatedAt = state.preferencesUpdatedAt ?? now
+        }
+        return preferences
     }
 
     /// Assigns updatedAt to a fresh local snapshot: unchanged items keep the
@@ -172,12 +275,32 @@ enum SnippetSyncMerge {
         snippets.sort { ($0.folderIdentifier, $0.index, $0.identifier) < ($1.folderIdentifier, $1.index, $1.identifier) }
         tombstones.sort { ($0.identifier, $0.kind.rawValue) < ($1.identifier, $1.kind.rawValue) }
 
-        let merged = SyncPayload(exportedAt: now, folders: folders, snippets: snippets, tombstones: tombstones)
+        let preferences = mergePreferences(local: local.preferences, remote: remotePayload.preferences)
+
+        let merged = SyncPayload(exportedAt: now, folders: folders, snippets: snippets, tombstones: tombstones, preferences: preferences)
         let localChanged = !isSameContent(folders: local.folders, snippets: local.snippets, as: merged)
         let remoteChanged = remote == nil
             || !isSameContent(folders: remotePayload.folders, snippets: remotePayload.snippets, as: merged)
             || Set(remotePayload.tombstones) != Set(merged.tombstones)
-        return Result(payload: merged, localChanged: localChanged, remoteChanged: remoteChanged)
+            || remotePayload.preferences != merged.preferences
+        let preferencesChanged = local.preferences != nil && preferences?.values != local.preferences?.values
+        return Result(payload: merged, localChanged: localChanged, remoteChanged: remoteChanged, preferencesChanged: preferencesChanged)
+    }
+
+    /// Whole-blob last-writer-wins for preferences. When the values are equal
+    /// the remote copy is kept so an unchanged bundle is never rewritten.
+    static func mergePreferences(local: SyncPreferences?, remote: SyncPreferences?) -> SyncPreferences? {
+        switch (local, remote) {
+        case (nil, nil):
+            return nil
+        case (let local?, nil):
+            return local
+        case (nil, let remote?):
+            return remote
+        case let (local?, remote?):
+            if local.values == remote.values { return remote }
+            return local.updatedAt > remote.updatedAt ? local : remote
+        }
     }
 
     /// Last-writer-wins union of two bundles (used for iCloud conflict copies,
@@ -206,7 +329,8 @@ enum SnippetSyncMerge {
         return SyncPayload(exportedAt: now,
                            folders: survivingFolders,
                            snippets: survivingSnippets,
-                           tombstones: Array(tombstones))
+                           tombstones: Array(tombstones),
+                           preferences: mergePreferences(local: lhs.preferences, remote: rhs.preferences))
     }
 
     // MARK: - Private

@@ -73,6 +73,7 @@ final class CPYUtilities {
         /* Snippet Sync */
         defaultValues.updateValue(NSNumber(value: true), forKey: Constants.SnippetSync.enabled)
         defaultValues.updateValue(SnippetSyncService.defaultDirectoryPath, forKey: Constants.SnippetSync.directory)
+        defaultValues.updateValue(NSNumber(value: true), forKey: Constants.SnippetSync.syncPreferences)
 
         AppEnvironment.current.defaults.register(defaults: defaultValues)
         AppEnvironment.current.defaults.synchronize()

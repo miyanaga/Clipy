@@ -32,6 +32,53 @@ final class SnippetSyncService {
     static let statusDidChangeNotification = Notification.Name("kCPYSnippetSyncStatusDidChange")
     static let bundleFileName = "snippets.clipy"
 
+    // Preferences that travel between machines. Machine-specific settings
+    // (login item, its alert suppression, crash reporting, Sparkle update
+    // policy) and the sync settings themselves are deliberately absent.
+    static let syncedPreferenceKeys: [String] = [
+        /* General */
+        Constants.UserDefaults.maxHistorySize,
+        Constants.UserDefaults.showStatusItem,
+        Constants.UserDefaults.inputPasteCommand,
+        Constants.UserDefaults.reorderClipsAfterPasting,
+        Constants.UserDefaults.storeTypes,
+        Constants.UserDefaults.suppressAlertForDeleteSnippet,
+        Constants.UserDefaults.excludeApplications,
+        /* Menu */
+        Constants.UserDefaults.menuIconSize,
+        Constants.UserDefaults.maxMenuItemTitleLength,
+        Constants.UserDefaults.numberOfItemsPlaceInline,
+        Constants.UserDefaults.numberOfItemsPlaceInsideFolder,
+        Constants.UserDefaults.menuItemsTitleStartWithZero,
+        Constants.UserDefaults.showAlertBeforeClearHistory,
+        Constants.UserDefaults.addClearHistoryMenuItem,
+        Constants.UserDefaults.showIconInTheMenu,
+        Constants.UserDefaults.menuItemsAreMarkedWithNumbers,
+        Constants.UserDefaults.addNumericKeyEquivalents,
+        Constants.UserDefaults.showToolTipOnMenuItem,
+        Constants.UserDefaults.showImageInTheMenu,
+        Constants.UserDefaults.maxLengthOfToolTip,
+        Constants.UserDefaults.thumbnailWidth,
+        Constants.UserDefaults.thumbnailHeight,
+        Constants.UserDefaults.overwriteSameHistory,
+        Constants.UserDefaults.copySameHistory,
+        Constants.UserDefaults.showColorPreviewInTheMenu,
+        /* Beta */
+        Constants.Beta.pastePlainText,
+        Constants.Beta.pastePlainTextModifier,
+        Constants.Beta.deleteHistory,
+        Constants.Beta.deleteHistoryModifier,
+        Constants.Beta.pasteAndDeleteHistory,
+        Constants.Beta.pasteAndDeleteHistoryModifier,
+        Constants.Beta.observerScreenshot,
+        /* HotKeys */
+        Constants.HotKey.mainKeyCombo,
+        Constants.HotKey.historyKeyCombo,
+        Constants.HotKey.snippetKeyCombo,
+        Constants.HotKey.folderKeyCombos,
+        Constants.HotKey.clearHistoryKeyCombo,
+    ]
+
     // MARK: - Properties
     private(set) var status = Status.disabled
     private(set) var keyIsSynchronized: Bool?
@@ -57,6 +104,10 @@ final class SnippetSyncService {
 
     var isEnabled: Bool {
         return AppEnvironment.current.defaults.bool(forKey: Constants.SnippetSync.enabled)
+    }
+
+    var syncsPreferences: Bool {
+        return AppEnvironment.current.defaults.bool(forKey: Constants.SnippetSync.syncPreferences)
     }
 
     var directoryPath: String {
@@ -104,6 +155,13 @@ final class SnippetSyncService {
         defaults.rx.observe(String.self, Constants.SnippetSync.directory, options: [.new], retainSelf: false)
             .subscribe(onNext: { [weak self] _ in
                 self?.settingsDidChange()
+            })
+            .disposed(by: disposeBag)
+
+        // Preference changes (debounced; the timer below is the backstop)
+        NotificationCenter.default.rx.notification(UserDefaults.didChangeNotification)
+            .subscribe(onNext: { [weak self] _ in
+                self?.scheduleSync(after: 10)
             })
             .disposed(by: disposeBag)
 
@@ -249,9 +307,15 @@ final class SnippetSyncService {
         }
 
         let state = loadState(for: directoryURL)
-        let local = makeLocalPayload(state: state, now: now)
+        var local = makeLocalPayload(state: state, now: now)
+        if syncsPreferences {
+            local.preferences = SnippetSyncMerge.attributePreferences(makePreferenceValues(), state: state, now: now)
+        }
         let result = SnippetSyncMerge.merge(local: local, remote: remote, state: state, now: now)
 
+        if result.preferencesChanged, let mergedPreferences = result.payload.preferences {
+            applyPreferences(mergedPreferences)
+        }
         if result.localChanged {
             try apply(result.payload)
             DispatchQueue.main.async {
@@ -281,6 +345,24 @@ final class SnippetSyncService {
 
         if directorySource == nil {
             DispatchQueue.main.async { if self.isEnabled { self.watchDirectory() } }
+        }
+    }
+
+    // MARK: - Preferences (defaults are injectable for tests)
+    func makePreferenceValues(defaults: UserDefaults = AppEnvironment.current.defaults) -> [String: SyncPreferenceValue] {
+        var values = [String: SyncPreferenceValue]()
+        for key in SnippetSyncService.syncedPreferenceKeys {
+            guard let object = defaults.object(forKey: key), let value = SyncPreferenceValue(plist: object) else { continue }
+            values[key] = value
+        }
+        return values
+    }
+
+    func applyPreferences(_ preferences: SyncPreferences, defaults: UserDefaults = AppEnvironment.current.defaults) {
+        for (key, value) in preferences.values {
+            // Never apply keys outside the allowlist, whatever the bundle says
+            guard SnippetSyncService.syncedPreferenceKeys.contains(key) else { continue }
+            defaults.set(value.plistObject, forKey: key)
         }
     }
 

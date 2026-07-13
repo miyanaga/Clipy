@@ -220,6 +220,110 @@ struct SnippetSyncRealmTests {
     }
 }
 
+struct SnippetSyncPreferencesTests {
+
+    private let now = Date(timeIntervalSince1970: 2_000_000)
+    private let earlier = Date(timeIntervalSince1970: 1_000_000)
+
+    private func payload(preferences: SyncPreferences?) -> SyncPayload {
+        return SyncPayload(exportedAt: .distantPast, folders: [], snippets: [], tombstones: [], preferences: preferences)
+    }
+
+    private func makeSuite() throws -> UserDefaults {
+        return try #require(UserDefaults(suiteName: "SnippetSyncPreferencesTests-\(UUID().uuidString)"))
+    }
+
+    @Test
+    func preferenceValuesRoundTripThroughDefaults() throws {
+        let source = try makeSuite()
+        source.set(true, forKey: Constants.UserDefaults.showIconInTheMenu)
+        source.set(42, forKey: Constants.UserDefaults.maxHistorySize)
+        source.set(["public.utf8-plain-text": NSNumber(value: true)], forKey: Constants.UserDefaults.storeTypes)
+        source.set(Data([1, 2, 3]), forKey: Constants.HotKey.mainKeyCombo)
+        source.set(false, forKey: Constants.UserDefaults.loginItem) // not in the allowlist
+
+        let service = SnippetSyncService()
+        let values = service.makePreferenceValues(defaults: source)
+        #expect(values[Constants.UserDefaults.showIconInTheMenu] == .bool(true))
+        #expect(values[Constants.UserDefaults.maxHistorySize] == .int(42))
+        #expect(values[Constants.UserDefaults.storeTypes] == .dictionary(["public.utf8-plain-text": .bool(true)]))
+        #expect(values[Constants.UserDefaults.loginItem] == nil)
+
+        let target = try makeSuite()
+        service.applyPreferences(SyncPreferences(values: values, updatedAt: now), defaults: target)
+        #expect(target.bool(forKey: Constants.UserDefaults.showIconInTheMenu))
+        #expect(target.integer(forKey: Constants.UserDefaults.maxHistorySize) == 42)
+        #expect(target.data(forKey: Constants.HotKey.mainKeyCombo) == Data([1, 2, 3]))
+
+        // Booleans must survive as booleans, not as 0/1 integers
+        let reread = service.makePreferenceValues(defaults: target)
+        #expect(reread[Constants.UserDefaults.showIconInTheMenu] == .bool(true))
+        #expect(reread[Constants.UserDefaults.maxHistorySize] == .int(42))
+    }
+
+    @Test
+    func applyIgnoresKeysOutsideAllowlist() throws {
+        let target = try makeSuite()
+        let service = SnippetSyncService()
+        let preferences = SyncPreferences(values: ["EvilInjectedKey": .string("boom"),
+                                                   Constants.UserDefaults.maxHistorySize: .int(50)],
+                                          updatedAt: now)
+        service.applyPreferences(preferences, defaults: target)
+        #expect(target.object(forKey: "EvilInjectedKey") == nil)
+        #expect(target.integer(forKey: Constants.UserDefaults.maxHistorySize) == 50)
+    }
+
+    @Test
+    func freshMachineAdoptsRemotePreferences() {
+        // No sync state yet: local values are only registration defaults and
+        // must lose against the remote bundle, even though remote is older
+        let state = SyncState.empty(directoryPath: "/tmp")
+        let localValues = [Constants.UserDefaults.maxHistorySize: SyncPreferenceValue.int(30)]
+        let local = payload(preferences: SnippetSyncMerge.attributePreferences(localValues, state: state, now: now))
+        let remote = payload(preferences: SyncPreferences(values: [Constants.UserDefaults.maxHistorySize: .int(100)], updatedAt: earlier))
+        let result = SnippetSyncMerge.merge(local: local, remote: remote, state: state, now: now)
+
+        #expect(result.preferencesChanged)
+        #expect(result.payload.preferences?.values[Constants.UserDefaults.maxHistorySize] == .int(100))
+        #expect(!result.remoteChanged)
+    }
+
+    @Test
+    func localPreferenceEditWinsOverOlderRemote() {
+        let oldPreferences = SyncPreferences(values: [Constants.UserDefaults.maxHistorySize: .int(30)], updatedAt: earlier)
+        let state = SyncState(directoryPath: "/tmp",
+                              items: [:],
+                              preferencesHash: oldPreferences.contentHash,
+                              preferencesUpdatedAt: earlier)
+
+        let localValues = [Constants.UserDefaults.maxHistorySize: SyncPreferenceValue.int(50)]
+        let local = payload(preferences: SnippetSyncMerge.attributePreferences(localValues, state: state, now: now))
+        let remote = payload(preferences: oldPreferences)
+        let result = SnippetSyncMerge.merge(local: local, remote: remote, state: state, now: now)
+
+        #expect(!result.preferencesChanged)
+        #expect(result.payload.preferences?.values[Constants.UserDefaults.maxHistorySize] == .int(50))
+        #expect(result.remoteChanged)
+    }
+
+    @Test
+    func equalPreferencesDoNotRewriteTheBundle() {
+        let values = [Constants.UserDefaults.maxHistorySize: SyncPreferenceValue.int(30)]
+        let remotePreferences = SyncPreferences(values: values, updatedAt: earlier)
+        let state = SyncState(directoryPath: "/tmp",
+                              items: [:],
+                              preferencesHash: remotePreferences.contentHash,
+                              preferencesUpdatedAt: earlier)
+
+        let local = payload(preferences: SnippetSyncMerge.attributePreferences(values, state: state, now: now))
+        let remote = payload(preferences: remotePreferences)
+        let result = SnippetSyncMerge.merge(local: local, remote: remote, state: state, now: now)
+
+        #expect(!result.preferencesChanged)
+        #expect(!result.remoteChanged)
+    }
+}
+
 struct SnippetSyncCryptoTests {
 
     @Test
