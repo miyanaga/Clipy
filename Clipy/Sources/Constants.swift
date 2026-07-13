@@ -20,7 +20,9 @@ struct Constants {
         #else
             static let name = "Clipy"
         #endif
-        static let appcastURL = URL(string: "https://clipy-app.com/appcast.xml")!
+        // Fork: Sparkle feed lives under our own domain (see Info.plist SUFeedURL);
+        // never point this at the upstream appcast or updates would replace the fork
+        static let appcastURL = URL(string: "https://miyanaga.github.io/Clipy/appcast.xml")!
     }
 
     struct Menu {

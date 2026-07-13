@@ -50,7 +50,9 @@ platform :mac do
       scheme: "Clipy",
       skip_build: true,
       verbose: true,
-      clean: true
+      clean: true,
+      # CI には署名証明書がないため、テストは署名なしでビルドする
+      xcargs: "CODE_SIGNING_ALLOWED=NO"
     )
   end
 
