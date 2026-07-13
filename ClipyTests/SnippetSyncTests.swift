@@ -164,16 +164,13 @@ struct SnippetSyncMergeTests {
     }
 }
 
-@MainActor @Suite(.serialized)
-final class SnippetSyncRealmTests {
-    init() {
-        Realm.Configuration.defaultConfiguration.inMemoryIdentifier = UUID().uuidString
-    }
+// Uses a private in-memory Realm configuration instead of mutating the global
+// default configuration: suites run in parallel, and touching the shared
+// default config races with the other Realm-based suites.
+@MainActor
+struct SnippetSyncRealmTests {
 
-    deinit {
-        let realm = try! Realm()
-        realm.transaction { realm.deleteAll() }
-    }
+    private let configuration = Realm.Configuration(inMemoryIdentifier: UUID().uuidString)
 
     private func payload(folders: [SyncFolderItem], snippets: [SyncSnippetItem]) -> SyncPayload {
         return SyncPayload(exportedAt: Date(), folders: folders, snippets: snippets, tombstones: [])
@@ -186,16 +183,16 @@ final class SnippetSyncRealmTests {
         let target = payload(folders: [SyncFolderItem(identifier: "f1", title: "Folder", enable: true, index: 0, updatedAt: now)],
                              snippets: [SyncSnippetItem(identifier: "s2", folderIdentifier: "f1", title: "second", content: "b", enable: true, index: 1, updatedAt: now),
                                         SyncSnippetItem(identifier: "s1", folderIdentifier: "f1", title: "first", content: "a", enable: true, index: 0, updatedAt: now)])
-        try service.apply(target)
+        try service.apply(target, configuration: configuration)
 
-        let realm = try Realm()
+        let realm = try Realm(configuration: configuration)
         let folder = try #require(realm.object(ofType: CPYFolder.self, forPrimaryKey: "f1"))
         #expect(folder.title == "Folder")
         #expect(folder.snippets.map { $0.identifier } == ["s1", "s2"])
         #expect(folder.snippets.first?.content == "a")
 
         // Realm snapshot must round-trip to the same content
-        let local = service.makeLocalPayload(state: SyncState.empty(directoryPath: "/tmp"), now: now)
+        let local = service.makeLocalPayload(state: SyncState.empty(directoryPath: "/tmp"), now: now, configuration: configuration)
         #expect(local.folders.map { $0.identifier } == ["f1"])
         #expect(Set(local.snippets.map { $0.identifier }) == ["s1", "s2"])
     }
@@ -206,13 +203,15 @@ final class SnippetSyncRealmTests {
         let now = Date()
         try service.apply(payload(folders: [SyncFolderItem(identifier: "f1", title: "Folder", enable: true, index: 0, updatedAt: now)],
                                   snippets: [SyncSnippetItem(identifier: "s1", folderIdentifier: "f1", title: "first", content: "a", enable: true, index: 0, updatedAt: now),
-                                             SyncSnippetItem(identifier: "s2", folderIdentifier: "f1", title: "second", content: "b", enable: true, index: 1, updatedAt: now)]))
+                                             SyncSnippetItem(identifier: "s2", folderIdentifier: "f1", title: "second", content: "b", enable: true, index: 1, updatedAt: now)]),
+                          configuration: configuration)
 
         // s2 deleted, s1 edited remotely
         try service.apply(payload(folders: [SyncFolderItem(identifier: "f1", title: "Renamed", enable: true, index: 0, updatedAt: now)],
-                                  snippets: [SyncSnippetItem(identifier: "s1", folderIdentifier: "f1", title: "first", content: "edited", enable: true, index: 0, updatedAt: now)]))
+                                  snippets: [SyncSnippetItem(identifier: "s1", folderIdentifier: "f1", title: "first", content: "edited", enable: true, index: 0, updatedAt: now)]),
+                          configuration: configuration)
 
-        let realm = try Realm()
+        let realm = try Realm(configuration: configuration)
         let folder = try #require(realm.object(ofType: CPYFolder.self, forPrimaryKey: "f1"))
         #expect(folder.title == "Renamed")
         #expect(folder.snippets.map { $0.identifier } == ["s1"])

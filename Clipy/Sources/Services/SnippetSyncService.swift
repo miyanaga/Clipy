@@ -284,9 +284,9 @@ final class SnippetSyncService {
         }
     }
 
-    // MARK: - Realm (internal for tests)
-    func makeLocalPayload(state: SyncState, now: Date) -> SyncPayload {
-        let realm = try! Realm()
+    // MARK: - Realm (configuration is injectable for tests)
+    func makeLocalPayload(state: SyncState, now: Date, configuration: Realm.Configuration = .defaultConfiguration) -> SyncPayload {
+        let realm = try! Realm(configuration: configuration)
         var folders = [SyncFolderItem]()
         var snippets = [SyncSnippetItem]()
         for folder in realm.objects(CPYFolder.self) {
@@ -311,8 +311,8 @@ final class SnippetSyncService {
                            tombstones: [])
     }
 
-    func apply(_ payload: SyncPayload) throws {
-        let realm = try Realm()
+    func apply(_ payload: SyncPayload, configuration: Realm.Configuration = .defaultConfiguration) throws {
+        let realm = try Realm(configuration: configuration)
         let keepFolderIds = payload.folders.map { $0.identifier }
         let keepSnippetIds = payload.snippets.map { $0.identifier }
         try realm.write {
