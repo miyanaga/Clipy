@@ -129,7 +129,9 @@ jobs:
           build
 
     # ── ビルド (ad-hoc 署名: Developer Program 未加入の間の暫定パス) ──────
-    # インストールには --no-quarantine が必要。署名がビルドごとに変わるため
+    # インストール後に quarantine 解除が必要:
+    #   /usr/bin/xattr -dr com.apple.quarantine /Applications/Clipy.app
+    # (Homebrew の --no-quarantine は廃止済み)。署名がビルドごとに変わるため
     # アップデート後はアクセシビリティ権限の再許可が必要になる。
     - name: Build (ad-hoc)
       if: env.HAS_CERT != 'true'
